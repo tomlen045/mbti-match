@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MBTI 灵魂配对 · 合盘神器</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(180deg,#0f1226,#1a0f2e);color:#f0f0ff;font-family:-apple-system,'PingFang SC',sans-serif;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:26px 18px 60px}
+h1{font-size:24px;text-align:center;margin:8px 0 2px}
+.sub{text-align:center;color:#9a92c8;font-size:13px;margin-bottom:24px}
+.lbl{text-align:center;font-size:15px;color:#c0b8e8;margin:16px 0 8px}
+.lbl b{color:#ffd166}
+select{width:100%;background:#1d2244;border:2px solid #3d3a6e;color:#fff;border-radius:14px;padding:13px;font-size:17px;font-weight:bold}
+.vs{text-align:center;font-size:30px;font-weight:900;color:#ff4d94;margin:6px 0;text-shadow:0 0 16px #ff4d9466}
+.btn{width:100%;background:linear-gradient(90deg,#58a6ff,#c15cff);border:none;color:#fff;border-radius:99px;padding:15px;font-size:17px;font-weight:900;cursor:pointer;margin-top:22px}
+#res{display:none}
+.score{text-align:center;margin:18px 0}
+.score .n{font-size:70px;font-weight:900;background:linear-gradient(90deg,#58a6ff,#ff4d94,#ffd166);-webkit-background-clip:text;background-clip:text;color:transparent}
+.score .t{font-size:18px;font-weight:bold;color:#ffd166;margin-top:2px}
+.bar{height:12px;background:#1d2244;border-radius:99px;overflow:hidden;margin:12px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#58a6ff,#ff4d94);border-radius:99px}
+.blk{background:rgba(255,255,255,.05);border-radius:14px;padding:16px;margin-bottom:12px}
+.blk h3{font-size:15px;color:#ffd166;margin-bottom:6px}
+.blk p{font-size:14px;line-height:1.9;color:#dcd6f5}
+.pill{text-align:center;background:#1d2244;border-radius:99px;padding:8px;font-size:14px;color:#9a92c8;margin-bottom:8px}
+.foot{text-align:center;color:#5b5488;font-size:12px;margin-top:20px}
+canvas{max-width:100%;border-radius:16px;margin-top:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>💞 MBTI 灵魂配对</h1>
+<p class="sub">你和 TA，是神仙组合还是塑料同窗？</p>
+<p class="lbl">🖐 <b>你的</b> MBTI</p>
+<select id="a"></select>
+<p class="vs">✖</p>
+<p class="lbl">💘 <b>TA 的</b> MBTI</p>
+<select id="b"></select>
+<button class="btn" onclick="match()">🔮 算一下契合度</button>
+<div id="res"></div>
+<p class="foot">娱乐向 · 别拿这个真分手 · 小薅薅出品</p>
+</div>
+<canvas id="cd" width="1080" height="1440" style="display:none"></canvas>
+<script>
+const T=["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENTP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
+const NAMES={INTJ:"沉默的架构师",INTP:"逻辑的隐士",ENTJ:"天生的指挥官",ENTP:"点子永动机",INFJ:"神秘的引路人",INFP:"理想主义小诗人",ENFJ:"温暖的发光体",ENTP:"爱抬杠的鬼才",ISTJ:"人形规则库",ISFJ:"温柔的守护者",ESTJ:"执行铁娘子",ESFJ:"热心的大家长",ISTP:"冷面手艺人",ISFP:"安静的艺术家",ESTP:"肾上腺素猎手",ESFP:"气氛组之王"};
+const A=document.getElementById("a"),B=document.getElementById("b");
+A.innerHTML=B.innerHTML=T.map(t=>`<option value="${t}">${t} · ${NAMES[t]}</option>`).join("");
+const DIM={0:["外向E","内向I"],1:["直觉N","实感S"],2:["思考T","情感F"],3:["判断J","感知P"]};
+function letter(t,i){return t[i]}
+function match(){
+ const a=A.value,b=B.value;
+ if(a===b){res(88,"镜像灵魂","你们像照镜子——连犯懒的姿势都一样。懂是真懂，就是没人催你俩起床。");return}
+ let c=0;for(let i=0;i<4;i++)if(letter(a,i)===letter(b,i))c++;
+ let score=50+c*8+Math.floor(Math.random()*7);
+ // 著名组合
+ const F={
+  "INTJ,ENTP":[98,"神仙眷侣","一个负责造火箭，一个负责问为什么不造更快的火箭。"],
+  "ENTP,INTJ":[97,"神仙眷侣","杠精遇上更杠的，爱意全在抬杠里。"],
+  "INFP,ENFJ":[95,"灵魂共鸣","一个用心说话，一个用温暖接住。"],
+  "ENFP,INFJ":[94,"光与守望","ENFP的光，终于照到了INFJ的堡垒里。"],
+  "INTP,INFJ":[92,"深夜频道","俩人聊到凌晨三点，越聊越觉得对方是失散的脑子。"],
+  "ESTJ,INFP":[41,"相爱相杀","一个列Excel，一个写诗。Excel最终没管住诗，诗也没治好Excel。"],
+  "ESFP,INTJ":[45,"错频二人组","一个在蹦迪，一个在图书馆隔空皱眉。"],
+  "ISFP,ESTJ":[52,"手工与报表","ESTJ嫌ISFP没计划，ISFP嫌ESTJ不懂美。"],
+ };
+ const key1=a+","+b,key2=b+","+a;
+ if(F[key1]||F[key2]){
+  const f=F[key1]||F[key2];
+  res(f[0],f[1],"名场面组合："+f[2]+" 计划表照做，梦想照追。");
+  return;
+ }
+ res(score,
+  score>=85?"神仙组合":score>=70?"默契搭档":score>=55?"互补搭子":"相爱相杀",
+  advice(a,b,c));
+}
+function advice(a,b,c){
+ const tips=[];
+ if(letter(a,0)!==letter(b,0))tips.push("一个需要充电一个需要放电：每周留一晚各玩各的，感情反而更稳。");
+ if(letter(a,1)!==letter(b,1))tips.push("一个聊理想一个聊现实：轮流听对方说完，你会发现另一种活法。");
+ if(letter(a,2)!==letter(b,2))tips.push("一个讲逻辑一个讲感受：吵架时先抱再讲道理，顺序错了全白搭。");
+ if(letter(a,3)!==letter(b,3))tips.push("一个做计划一个随缘走：旅行攻略让J来做，惊喜交给P。");
+ if(!tips.length)tips.push("你们太像了，像照镜子——记得偶尔走出舒适圈，给关系加点新东西。");
+ return tips;
+}
+function res(score,mode,tips){
+ const arr=Array.isArray(tips)?tips:[tips];
+ document.getElementById("res").innerHTML=`
+ <div class="score"><div class="n">${score}%</div><div class="t">${mode}</div></div>
+ <div class="bar"><i style="width:${score}%"></i></div>
+ <div class="blk"><h3>💞 你们的相处画风</h3><p>${arr.map(t=>"• "+t).join("<br>• ")}</p></div>
+ <div class="blk"><h3>🗣 一句话点评</h3><p>${score>=85?"别犹豫了，把这条转发给TA。":score>=70?"稳的，但记得定期给关系充电。":score>=55?"互补的意思是：互相补刀，也互相补位。":"传说中的欢喜冤家——能磨合就是绝配，磨合不了就是喜剧素材。"}</p></div>
+ <div class="pill">⚠️ 娱乐向测试 · 真实的感情不看字母看真心</div>
+ <canvas id="cd" width="1080" height="1440" style="display:none"></canvas>
+ <button class="btn" onclick="draw('${a}','${b}',${score},'${mode}')">🎴 生成配对卡片（转发给TA）</button>`;
+ document.getElementById("res").style.display="block";
+ document.getElementById("res").scrollIntoView({behavior:"smooth"});
+}
+function draw(a,b,score,mode){
+ const c=document.getElementById("cd"),x=c.getContext("2d");
+ const g=x.createLinearGradient(0,0,1080,1440);g.addColorStop(0,"#0f1226");g.addColorStop(1,"#1a0f2e");
+ x.fillStyle=g;x.fillRect(0,0,1080,1440);
+ x.textAlign="center";x.fillStyle="#c0b8e8";x.font="bold 34px sans-serif";x.fillText("💞 MBTI 灵魂配对",540,110);
+ x.fillStyle="#58a6ff";x.font="900 120px sans-serif";x.fillText(a[0]+a[3],270,330);
+ x.fillStyle="#ff4d94";x.fillText(b[0]+b[3],810,330);
+ x.fillStyle="#ffd166";x.font="bold 46px sans-serif";x.fillText(mode,540,470);
+ x.font="900 150px sans-serif";x.fillText(score+"%",540,680);
+ x.fillStyle="#1d2244";x.fillRect(140,740,800,36);x.fillStyle="#ff4d94";x.fillRect(140,740,800*score/100,36);
+ x.fillStyle="#e6edf3";x.font="34px sans-serif";
+ x.fillText(a+" × "+b,540,850);
+ x.fillStyle="#9a92c8";x.font="28px sans-serif";x.textAlign="left";
+ x.fillText("2026.09 · 娱乐向测试",64,1380);
+ x.textAlign="right";x.fillStyle="#ffd166";x.fillText("🔍 搜「小薅薅」",1016,1380);
+ c.style.display="block";
+ const ac=document.createElement("a");ac.download="mbti-match.png";ac.href=c.toDataURL();ac.click();
+}
+</script>
+</body>
+</html>
